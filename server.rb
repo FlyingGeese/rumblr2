@@ -1,12 +1,14 @@
 require "sinatra/activerecord"
 require 'sinatra'
+require './auth'
+include Auth
 
 enable :sessions
 
-if ENV['RACK_ENV'] == 'development'
-   set :database, {adapter: "sqlite3", database: "database.sqlite3"}
-else
+if ENV['RACK_ENV']
   ActiveRecord::Base.establish_connection(ENV['DATABASE_URL'])
+else
+  set :database, {adapter: "sqlite3", database: "database.sqlite3"}
 end
 
 class User < ActiveRecord::Base
@@ -19,7 +21,7 @@ end
 
 
 get '/' do
-  # "rack.session.options"=>{:path=>"/"
+    p session
     @req = request.path
     erb :home
 end
@@ -65,14 +67,14 @@ post '/login' do # CREATE
     user = User.find_by(email: params['email'])
     if user != nil
         if user.password == params['password']
-            session[:user_id] = user.id
+            Auth::login(session, user)
             redirect "/users/#{user.id}"
         end
     end
 end
 
 post '/logout' do # DELETE
-    session['user_id'] = nil
+    Auth::logout(session)
 end
 
 
@@ -87,6 +89,10 @@ end
 get '/users/:id' do # READ
     @user = User.find(params['id'])
     erb :'/users/show'
+end
+
+get '/profile' do
+    @current_user = Auth::current_user
 end
 
 
