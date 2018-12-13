@@ -1,0 +1,14 @@
+<ul>
+  <li><a href="/">Home</a></li>
+  <% if session['user_id'] == nil %>
+  <li><a href="/users/new">Sign up</a></li>
+  <li><a href="/login">Login</a></li>
+  <% end %>
+  <li><a href="/articles/new">Write an Article</a></li>
+  <% if session['user_id'] %>
+    <form action='/logout' method='post'>
+       <input type='submit' value='Log out'>
+    </form>
+  <% end %>
+ <!--  <li><a href="/logout">Logout</a></li> -->
+</ul>
